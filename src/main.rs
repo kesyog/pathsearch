@@ -41,13 +41,16 @@ fn main() -> Result<()> {
         .into_par_iter()
         .flat_map(get_executables)
         .flatten()
+        // Dedupe
         .collect::<HashSet<OsString>>()
         .drain()
         .collect::<Vec<OsString>>();
     cmds.par_sort_unstable();
 
     for cmd in cmds {
-        println!("{}", cmd.to_str().unwrap());
+        if let Some(cmd) = cmd.to_str() {
+            println!("{}", cmd);
+        }
     }
 
     Ok(())
