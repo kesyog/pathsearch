@@ -1,6 +1,8 @@
 /// Enumerate all executables on PATH
 ///
-/// Intended to be piped to something like fzf
+/// Potential use cases:
+/// * Pipe output to fzf and have an executable runner
+/// * dmenu_path replacement
 use anyhow::{anyhow, Result};
 use rayon::prelude::*;
 use std::collections::HashSet;
@@ -10,12 +12,15 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 fn get_executables<T: AsRef<Path>>(path: T) -> Result<Vec<OsString>> {
+    // TODO: check if this handles symbolic links properly
+    // TODO: use jwalk crate for better parallelism
     let entries = fs::read_dir(&path)?
         .filter_map(|entry| match entry {
             Ok(entry) => {
                 if entry.file_type().unwrap().is_file()
                     // Check if the owner has exec permission
                     // TODO: check if current user has exec permission
+                    // TODO: check if this is reason for difference vs. dmenu_path
                     && entry.metadata().unwrap().mode() & 0o200 != 0
                 {
                     Some(entry.file_name())
