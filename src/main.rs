@@ -7,17 +7,32 @@
 /// * Pipe to fzf → Launch stuff from your terminal → profit
 /// * Faster dmenu_path replacement
 use anyhow::{anyhow, Result};
-use nix::unistd::{self, AccessFlags};
 use rayon::prelude::*;
 use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs::DirEntry;
+#[cfg(unix)]
+use std::os::unix::prelude::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-fn is_executable(entry: DirEntry) -> Option<OsString> {
-    if !entry.file_type().ok()?.is_dir() && unistd::access(&entry.path(), AccessFlags::X_OK).is_ok()
-    {
+#[cfg(unix)]
+fn is_executable(entry: &DirEntry) -> bool {
+    match entry.metadata() {
+        // The access syscall is probably more accurate in edge cases but much slower
+        Ok(meta) => meta.mode() & 0o111 != 0,
+        Err(_) => false,
+    }
+}
+
+#[cfg(not(unix))]
+fn is_executable(entry: &DirEntry) -> bool {
+    compile_error!("Only Unix systems are supported");
+    unimplemented!();
+}
+
+fn executable_file_filter(entry: DirEntry) -> Option<OsString> {
+    if !entry.file_type().ok()?.is_dir() && is_executable(&entry) {
         Some(entry.file_name())
     } else {
         None
@@ -27,7 +42,7 @@ fn is_executable(entry: DirEntry) -> Option<OsString> {
 fn find_executables<T: AsRef<Path>>(path: T) -> Result<Vec<OsString>> {
     let entries = fs::read_dir(&path)?
         .flatten()
-        .filter_map(is_executable)
+        .filter_map(executable_file_filter)
         .collect();
     Ok(entries)
 }

@@ -1,11 +1,10 @@
 [package]
 name = "pathsearch"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [dependencies]
 anyhow = "1.0.41"
-nix = "0.23"
 rayon = "1.5.1"
 
 [profile.release]
