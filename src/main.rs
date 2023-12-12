@@ -5,7 +5,7 @@
 /// Potential use cases:
 ///
 /// * Pipe to fzf → Launch stuff from your terminal → profit
-/// * Faster dmenu_path replacement
+/// * Faster `dmenu_path` replacement
 use anyhow::{anyhow, Result};
 use rayon::prelude::*;
 use std::collections::BTreeSet;
@@ -20,7 +20,8 @@ use std::{env, fs};
 #[cfg(unix)]
 fn is_executable(entry: &DirEntry) -> bool {
     match entry.metadata() {
-        // The access syscall is probably more accurate in edge cases but much slower
+        // The access syscall is probably more accurate in edge cases with multiple users but much
+        // slower
         Ok(meta) => meta.mode() & 0o111 != 0,
         Err(_) => false,
     }
@@ -32,8 +33,8 @@ fn is_executable(entry: &DirEntry) -> bool {
     unimplemented!();
 }
 
-fn executable_file_filter(entry: DirEntry) -> Option<OsString> {
-    if !entry.file_type().ok()?.is_dir() && is_executable(&entry) {
+fn executable_file_filter(entry: &DirEntry) -> Option<OsString> {
+    if !entry.file_type().ok()?.is_dir() && is_executable(entry) {
         Some(entry.file_name())
     } else {
         None
@@ -43,7 +44,7 @@ fn executable_file_filter(entry: DirEntry) -> Option<OsString> {
 fn find_executables<T: AsRef<Path>>(path: T) -> Result<Vec<OsString>> {
     let entries = fs::read_dir(&path)?
         .flatten()
-        .filter_map(executable_file_filter)
+        .filter_map(|entry| executable_file_filter(&entry))
         .collect();
     Ok(entries)
 }
