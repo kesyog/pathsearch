@@ -11,6 +11,7 @@ use rayon::prelude::*;
 use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::fs::DirEntry;
+use std::io::Write;
 #[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 use std::path::{Path, PathBuf};
@@ -57,11 +58,12 @@ fn main() -> Result<()> {
         .flatten()
         .collect();
 
+    let mut stdout = std::io::stdout();
     for cmd in cmds {
-        if let Some(cmd) = cmd.to_str() {
-            println!("{}", cmd);
-        }
+        stdout.write_all(cmd.as_encoded_bytes())?;
+        stdout.write_all(b"\n")?;
     }
+    stdout.flush()?;
 
     Ok(())
 }
