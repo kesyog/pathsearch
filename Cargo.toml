@@ -1,6 +1,9 @@
 [package]
 name = "pathsearch"
-version = "0.3.0"
+version = "0.4.0"
+authors = ["Kesavan Yogeswaran <hikes@google.com>"]
+license = "Apache-2.0"
+readme = "README.md"
 edition = "2021"
 
 [dependencies]
