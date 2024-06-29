@@ -11,14 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-/// # pathsearch 🕵
-///
-/// Enumerate all executables in `$PATH`. Unix-only.
-///
-/// Potential use cases:
-///
-/// * Pipe to fzf → Launch stuff from your terminal → profit
-/// * Faster `dmenu_path` replacement
+//! # pathsearch 🕵
+//!
+//! Enumerate all executables in `$PATH`. Unix-only.
+//!
+//! Potential use cases:
+//!
+//! * Pipe to fzf → Launch stuff from your terminal → profit
+//! * Faster `dmenu_path` replacement
 use anyhow::{anyhow, Result};
 use rayon::prelude::*;
 use std::collections::BTreeSet;
